@@ -1,32 +1,19 @@
-# 📊 CRM · Funil de Vendas
+# CRM · Funil de Vendas
 
-Mini-CRM de funil de vendas que **roda 100% no navegador** — sem cadastro, sem servidor. Cadastre leads, mova pelo funil e acompanhe sua conversão. Os dados ficam salvos localmente (localStorage).
+Um CRM enxuto que roda inteiro no navegador. Sem login, sem servidor, sem mensalidade — abre e usa. Você cadastra o lead, move ele pelo funil e acompanha a conversão na hora. Os dados ficam salvos no próprio navegador.
 
-Parte do ecossistema **KAIA**; nasceu como extensão do dashboard de vendas do app KAIAfy.
+**No ar:** https://mkbraion.github.io/crm-funil-vendas/
 
-## O que faz
+## O que dá pra fazer
 
-- **Funil kanban** com 4 estágios: Novo → Em contato → Proposta → Ganho.
-- **Cadastro de leads**: nome, WhatsApp, valor estimado, origem e observações.
-- **Mover leads** entre estágios (◀ ▶), marcar como **Perdido** ou recuperar.
-- **Botão de WhatsApp** por lead (abre a conversa direto).
-- **Métricas ao vivo**: leads ativos, valor no funil, valor ganho e taxa de conversão.
-- **Exportar** tudo em JSON.
-- Dados persistem no navegador; nada sai do seu computador.
+Cadastrar leads (nome, WhatsApp, valor, origem e observação), mover entre as etapas — Novo → Em contato → Proposta → Ganho —, marcar como perdido, chamar no WhatsApp direto do card e exportar tudo em JSON.
+
+No topo ficam os quatro números que interessam: leads ativos, valor no funil, valor ganho e taxa de conversão. Tudo recalcula sozinho conforme você mexe.
 
 ## Rodar
 
-Abra o `index.html` no navegador. Só isso.
+Abre o `index.html`. É isso. Pra acessar de qualquer lugar, joga no GitHub Pages (os dados ficam por navegador/aparelho).
 
-Ou publique de graça no **GitHub Pages** e acesse de qualquer lugar (os dados ficam por dispositivo/navegador).
+## Próximos passos
 
-## Roadmap
-
-- [ ] Arrastar e soltar (drag & drop) entre colunas
-- [ ] Importar JSON / CSV
-- [ ] Sincronizar com o backend [SalesHub](https://github.com/mkbraion/SalesHub) (multi-dispositivo)
-- [ ] Lembretes de follow-up
-
----
-
-Feito por [@mkbraion](https://github.com/mkbraion).
+Sincronizar com o backend [SalesHub](https://github.com/mkbraion/SalesHub) pra usar em vários aparelhos, e um lembrete de follow-up pra não esquecer de retornar o cliente.
