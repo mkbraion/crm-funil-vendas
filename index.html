@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CRM · Funil de Vendas</title>
-<meta name="description" content="Mini-CRM de funil de vendas — cadastre leads, mova pelo funil e acompanhe conversão. Roda no navegador, salva localmente." />
+<meta name="description" content="Mini-CRM de funil de vendas — cadastre leads, mova pelo funil e acompanhe conversão. Funciona local ou na nuvem (multi-dispositivo)." />
 <style>
   :root{
     --bg:#0d1117;--panel:#161b22;--card:#1c2330;--border:#2a3340;--text:#e6edf3;--muted:#96a0ad;
@@ -15,10 +15,13 @@
   .top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px}
   .top h1{font-size:19px;display:flex;align-items:center;gap:8px}
   .top h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+  .top .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{border:0;cursor:pointer;font-weight:600;border-radius:9px;padding:10px 16px;font-size:14px;font-family:inherit}
   .btn.primary{background:var(--brand);color:#fff}
   .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
   .btn.ghost:hover{border-color:var(--brand)}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:5px 12px}
+  .badge.cloud{color:var(--ganho);border-color:rgba(34,197,94,.4)}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 22px}
   @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
   .stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
@@ -53,14 +56,25 @@
   .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .modal .foot{display:flex;gap:10px;margin-top:20px}
   .modal .foot .btn{flex:1}
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:8px}
+  .tab{flex:1;background:none;border:0;padding:9px;border-radius:8px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit}
+  .tab.active{background:var(--brand);color:#fff}
+  .form-error{background:#3a1a1a;color:#f6a5a5;border-radius:8px;padding:9px 12px;font-size:13px;margin-top:12px}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 22px;border-radius:999px;font-size:14px;z-index:80;box-shadow:0 12px 30px rgba(0,0,0,.4);max-width:90vw;text-align:center;display:none}
+  .toast.show{display:block}
+  .toast.err{border-color:var(--perdido);color:#f6a5a5}
 </style>
 </head>
 <body>
   <div class="top">
     <h1><span class="dot"></span> CRM · Funil de Vendas</h1>
-    <div>
+    <div class="actions">
+      <span class="badge" id="syncBadge">💾 Local (neste navegador)</span>
       <button class="btn ghost" id="seed">Dados de exemplo</button>
       <button class="btn ghost" id="export">Exportar</button>
+      <button class="btn ghost" id="cloudBtn">☁️ Entrar na nuvem</button>
+      <button class="btn ghost" id="logoutBtn" hidden>Sair</button>
       <button class="btn primary" id="add">+ Novo lead</button>
     </div>
   </div>
@@ -74,7 +88,7 @@
 
   <div class="board" id="board"></div>
 
-  <!-- Modal -->
+  <!-- Modal lead -->
   <div class="overlay" id="overlay">
     <div class="modal">
       <h3 id="modal-title">Novo lead</h3>
@@ -99,22 +113,111 @@
     </div>
   </div>
 
+  <!-- Modal nuvem (login/cadastro) -->
+  <div class="overlay" id="authOverlay">
+    <div class="modal">
+      <h3>Sincronizar na nuvem</h3>
+      <p class="hint" style="margin-top:0">Crie uma conta (ou entre) para acessar seus leads de qualquer aparelho.</p>
+      <div class="tabs">
+        <button class="tab active" id="tabLogin">Entrar</button>
+        <button class="tab" id="tabRegister">Criar conta</button>
+      </div>
+      <div id="nameField" hidden><label>Nome</label><input id="a-name" placeholder="Seu nome" /></div>
+      <label>E-mail</label>
+      <input id="a-email" type="email" placeholder="voce@email.com" />
+      <label>Senha</label>
+      <input id="a-pass" type="password" placeholder="Mínimo 8 caracteres" />
+      <details>
+        <summary class="hint" style="cursor:pointer">Servidor (avançado)</summary>
+        <input id="a-base" placeholder="https://crm-api.onrender.com" style="margin-top:6px" />
+      </details>
+      <p class="form-error" id="authError" hidden></p>
+      <div class="foot">
+        <button class="btn ghost" id="authCancel">Cancelar</button>
+        <button class="btn primary" id="authSubmit">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
 <script>
 const KEY = 'crm_leads_v1';
+const BASE_KEY = 'crm_api_base';
+const TOKEN_KEY = 'crm_token';
+const USER_KEY = 'crm_user';
+const DEFAULT_BASE = 'https://crm-api.onrender.com';
 const STAGES = [
-  { id:'novo',     nome:'Novo',            cor:'var(--novo)' },
-  { id:'contato',  nome:'Em contato',      cor:'var(--contato)' },
-  { id:'proposta', nome:'Proposta',        cor:'var(--proposta)' },
-  { id:'ganho',    nome:'Ganho',           cor:'var(--ganho)' },
+  { id:'novo',     nome:'Novo',       cor:'var(--novo)' },
+  { id:'contato',  nome:'Em contato', cor:'var(--contato)' },
+  { id:'proposta', nome:'Proposta',   cor:'var(--proposta)' },
+  { id:'ganho',    nome:'Ganho',      cor:'var(--ganho)' },
 ];
 const $ = (id) => document.getElementById(id);
-let leads = load();
 
-function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
-function persist(){ localStorage.setItem(KEY, JSON.stringify(leads)); render(); }
+const CLOUD = {
+  base: localStorage.getItem(BASE_KEY) || DEFAULT_BASE,
+  token: localStorage.getItem(TOKEN_KEY) || null,
+  user: JSON.parse(localStorage.getItem(USER_KEY) || 'null'),
+};
+let leads = loadLocal();
+let authMode = 'login';
+
+function loadLocal(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function saveLocal(){ localStorage.setItem(KEY, JSON.stringify(leads)); }
 function brl(n){ return 'R$ ' + (Number(n)||0).toLocaleString('pt-BR'); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+let toastTimer;
+function toast(msg, err){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.className = 'toast', 3000);
+}
+
+// ---------- API ----------
+async function api(path, options = {}){
+  const headers = { 'Content-Type':'application/json' };
+  if(CLOUD.token) headers.Authorization = 'Bearer ' + CLOUD.token;
+  const res = await fetch(CLOUD.base + path, { ...options, headers });
+  const data = await res.json().catch(()=> ({}));
+  if(!res.ok) throw new Error(data.error || 'Erro de conexão com o servidor.');
+  return data;
+}
+
+// ---------- Operações (local OU nuvem) ----------
+async function opCreate(data){
+  if(CLOUD.token){
+    const r = await api('/api/leads', { method:'POST', body: JSON.stringify(data) });
+    leads.push(r.lead);
+  } else {
+    leads.push({ id:uid(), stage:0, lost:false, ...data });
+    saveLocal();
+  }
+  render();
+}
+async function opUpdate(lead, changes){
+  if(CLOUD.token){
+    const r = await api('/api/leads/'+lead.id, { method:'PUT', body: JSON.stringify({ ...lead, ...changes }) });
+    Object.assign(lead, r.lead);
+  } else {
+    Object.assign(lead, changes);
+    saveLocal();
+  }
+  render();
+}
+async function opDelete(lead){
+  if(CLOUD.token) await api('/api/leads/'+lead.id, { method:'DELETE' });
+  leads = leads.filter(x => x.id !== lead.id);
+  if(!CLOUD.token) saveLocal();
+  render();
+}
+function guard(fn){ return (...a) => fn(...a).catch(e => toast(e.message, true)); }
+
+// ---------- Render ----------
 function render(){
   const board = $('board');
   board.innerHTML = '';
@@ -127,7 +230,6 @@ function render(){
     inStage.forEach(l => col.appendChild(cardEl(l, idx)));
     board.appendChild(col);
   });
-  // Perdidos (se houver)
   const lost = leads.filter(l => l.lost);
   if(lost.length){
     const col = document.createElement('div');
@@ -135,7 +237,7 @@ function render(){
     col.style.gridColumn = '1 / -1';
     col.innerHTML = `<h2><span class="tag" style="background:var(--perdido)"></span>Perdidos<span class="count">${lost.length}</span></h2>`;
     lost.forEach(l => col.appendChild(cardEl(l, l.stage)));
-    document.getElementById('board').appendChild(col);
+    board.appendChild(col);
   }
   updateStats();
 }
@@ -155,13 +257,13 @@ function cardEl(l, idx){
     <div class="meta">${esc(l.origem||'—')}${l.fone?' · '+esc(l.fone):''}</div>
     ${l.obs?`<div class="obs">${esc(l.obs)}</div>`:''}
     <div class="actions">${back}${fwd}${waBtn}<button class="mini" data-edit="1">Editar</button>${lostBtn}<button class="mini del" data-del="1">🗑</button></div>`;
-  el.querySelector('[data-move="-1"]')?.addEventListener('click', ()=>{ l.stage--; persist(); });
-  el.querySelector('[data-move="1"]')?.addEventListener('click', ()=>{ l.stage++; persist(); });
-  el.querySelector('[data-lost]')?.addEventListener('click', ()=>{ l.lost = true; persist(); });
-  el.querySelector('[data-recover]')?.addEventListener('click', ()=>{ l.lost = false; persist(); });
+  el.querySelector('[data-move="-1"]')?.addEventListener('click', guard(()=> opUpdate(l, { stage: l.stage - 1 })));
+  el.querySelector('[data-move="1"]')?.addEventListener('click', guard(()=> opUpdate(l, { stage: l.stage + 1 })));
+  el.querySelector('[data-lost]')?.addEventListener('click', guard(()=> opUpdate(l, { lost: true })));
+  el.querySelector('[data-recover]')?.addEventListener('click', guard(()=> opUpdate(l, { lost: false })));
   el.querySelector('[data-edit]')?.addEventListener('click', ()=> openModal(l));
-  el.querySelector('[data-del]')?.addEventListener('click', ()=>{ if(confirm('Excluir este lead?')){ leads = leads.filter(x=>x.id!==l.id); persist(); } });
-  el.querySelector('[data-wa]')?.addEventListener('click', (e)=>{ window.open('https://wa.me/'+e.target.dataset.wa, '_blank'); });
+  el.querySelector('[data-del]')?.addEventListener('click', ()=>{ if(confirm('Excluir este lead?')) guard(()=> opDelete(l))(); });
+  el.querySelector('[data-wa]')?.addEventListener('click', (e)=>{ window.open('https://wa.me/'+e.target.dataset.wa, '_blank', 'noopener'); });
   return el;
 }
 
@@ -178,9 +280,7 @@ function updateStats(){
   $('s-conv').textContent = conv + '%';
 }
 
-function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-// Modal
+// ---------- Modal lead ----------
 function openModal(lead){
   $('modal-title').textContent = lead ? 'Editar lead' : 'Novo lead';
   $('f-id').value = lead?.id || '';
@@ -197,15 +297,15 @@ function closeModal(){ $('overlay').classList.remove('open'); }
 $('add').addEventListener('click', ()=> openModal(null));
 $('cancel').addEventListener('click', closeModal);
 $('overlay').addEventListener('click', (e)=>{ if(e.target === $('overlay')) closeModal(); });
-$('save').addEventListener('click', ()=>{
+$('save').addEventListener('click', guard(async ()=>{
   const nome = $('f-nome').value.trim();
   if(!nome){ $('f-nome').focus(); return; }
+  const data = { nome, fone:$('f-fone').value.trim(), valor:parseInt($('f-valor').value)||0, origem:$('f-origem').value, obs:$('f-obs').value.trim() };
   const id = $('f-id').value;
-  const data = { nome, fone:$('f-fone').value.trim(), valor:$('f-valor').value, origem:$('f-origem').value, obs:$('f-obs').value.trim() };
-  if(id){ Object.assign(leads.find(l=>l.id===id), data); }
-  else { leads.push({ id:uid(), stage:0, lost:false, ...data }); }
-  closeModal(); persist();
-});
+  if(id){ const lead = leads.find(l=>l.id===id); if(lead) await opUpdate(lead, data); }
+  else { await opCreate({ ...data, stage:0, lost:false }); }
+  closeModal();
+}));
 
 $('export').addEventListener('click', ()=>{
   const blob = new Blob([JSON.stringify(leads,null,2)], {type:'application/json'});
@@ -213,20 +313,115 @@ $('export').addEventListener('click', ()=>{
   a.href = URL.createObjectURL(blob); a.download = 'crm-leads.json'; a.click();
 });
 
-$('seed').addEventListener('click', ()=>{
+$('seed').addEventListener('click', guard(async ()=>{
   if(leads.length && !confirm('Isso adiciona leads de exemplo. Continuar?')) return;
   const ex = [
-    { nome:'Maria Souza', fone:'5511990000001', valor:1500, origem:'Instagram', obs:'Quer site para clínica de estética.', stage:2 },
-    { nome:'João Pereira', fone:'5511990000002', valor:497, origem:'Indicação', obs:'Site de advocacia. Pediu proposta.', stage:1 },
-    { nome:'Ana Lima', fone:'5511990000003', valor:997, origem:'Tráfego pago', obs:'Pacote completo + IA.', stage:3 },
-    { nome:'Carlos Dias', fone:'', valor:800, origem:'Google', obs:'Ainda avaliando.', stage:0 },
+    { nome:'Maria Souza', fone:'5511990000001', valor:1500, origem:'Instagram', obs:'Quer site para clínica de estética.', stage:2, lost:false },
+    { nome:'João Pereira', fone:'5511990000002', valor:497, origem:'Indicação', obs:'Site de advocacia. Pediu proposta.', stage:1, lost:false },
+    { nome:'Ana Lima', fone:'5511990000003', valor:997, origem:'Tráfego pago', obs:'Pacote completo + IA.', stage:3, lost:false },
+    { nome:'Carlos Dias', fone:'', valor:800, origem:'Google', obs:'Ainda avaliando.', stage:0, lost:false },
   ];
-  ex.forEach(e => leads.push({ id:uid(), lost:false, ...e }));
-  persist();
+  for(const e of ex) await opCreate(e);
+  toast('Leads de exemplo adicionados.');
+}));
+
+// ---------- Nuvem (auth) ----------
+function updateSyncUI(){
+  const badge = $('syncBadge');
+  if(CLOUD.token && CLOUD.user){
+    badge.textContent = '☁️ ' + CLOUD.user.name.split(' ')[0] + ' (sincronizado)';
+    badge.className = 'badge cloud';
+    $('cloudBtn').hidden = true;
+    $('logoutBtn').hidden = false;
+  } else {
+    badge.textContent = '💾 Local (neste navegador)';
+    badge.className = 'badge';
+    $('cloudBtn').hidden = false;
+    $('logoutBtn').hidden = true;
+  }
+}
+function openAuth(mode){
+  authMode = mode || 'login';
+  $('tabLogin').classList.toggle('active', authMode === 'login');
+  $('tabRegister').classList.toggle('active', authMode === 'register');
+  $('nameField').hidden = authMode !== 'register';
+  $('authSubmit').textContent = authMode === 'register' ? 'Criar conta' : 'Entrar';
+  $('a-base').value = CLOUD.base;
+  $('authError').hidden = true;
+  $('authOverlay').classList.add('open');
+}
+function closeAuth(){ $('authOverlay').classList.remove('open'); }
+
+async function pullLeads(){
+  const { leads: serverLeads } = await api('/api/leads');
+  // Primeira vez com leads locais e nuvem vazia? Oferece subir.
+  const localOnes = loadLocal();
+  if(serverLeads.length === 0 && localOnes.length > 0 &&
+     confirm(`Enviar seus ${localOnes.length} leads locais para a nuvem?`)){
+    for(const l of localOnes){
+      await api('/api/leads', { method:'POST', body: JSON.stringify(l) });
+    }
+    const again = await api('/api/leads');
+    leads = again.leads;
+  } else {
+    leads = serverLeads;
+  }
+  render();
+}
+
+$('cloudBtn').addEventListener('click', ()=> openAuth('login'));
+$('tabLogin').addEventListener('click', ()=> openAuth('login'));
+$('tabRegister').addEventListener('click', ()=> openAuth('register'));
+$('authCancel').addEventListener('click', closeAuth);
+$('authOverlay').addEventListener('click', (e)=>{ if(e.target === $('authOverlay')) closeAuth(); });
+$('logoutBtn').addEventListener('click', ()=>{
+  CLOUD.token = null; CLOUD.user = null;
+  localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY);
+  leads = loadLocal();
+  updateSyncUI(); render();
+  toast('Você saiu. Voltou ao modo local.');
 });
 
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
-render();
+$('authSubmit').addEventListener('click', guard(async ()=>{
+  const err = $('authError'); err.hidden = true;
+  CLOUD.base = ($('a-base').value.trim() || DEFAULT_BASE).replace(/\/$/,'');
+  const body = { email: $('a-email').value.trim(), password: $('a-pass').value };
+  if(authMode === 'register') body.name = $('a-name').value.trim();
+  try{
+    const data = await api(authMode === 'register' ? '/api/auth/register' : '/api/auth/login',
+      { method:'POST', body: JSON.stringify(body) });
+    CLOUD.token = data.token; CLOUD.user = data.user;
+    localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    localStorage.setItem(BASE_KEY, CLOUD.base);
+    closeAuth();
+    updateSyncUI();
+    await pullLeads();
+    toast('Conectado! Seus leads agora estão na nuvem.');
+  }catch(e){
+    err.textContent = e.message; err.hidden = false;
+  }
+}));
+
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeModal(); closeAuth(); } });
+
+// ---------- Início ----------
+async function boot(){
+  updateSyncUI();
+  render();
+  if(CLOUD.token){
+    // valida a sessão e puxa os leads da nuvem
+    try { leads = (await api('/api/leads')).leads; render(); }
+    catch(e){
+      // token expirado/servidor fora: volta ao modo local sem perder nada
+      CLOUD.token = null; CLOUD.user = null;
+      localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY);
+      leads = loadLocal(); updateSyncUI(); render();
+      toast('Sessão encerrada — modo local.', true);
+    }
+  }
+}
+boot();
 </script>
 </body>
 </html>
