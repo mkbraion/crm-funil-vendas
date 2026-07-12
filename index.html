@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CRM · Funil de Vendas</title>
+<meta name="description" content="Mini-CRM de funil de vendas — cadastre leads, mova pelo funil e acompanhe conversão. Roda no navegador, salva localmente." />
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--card:#1c2330;--border:#2a3340;--text:#e6edf3;--muted:#96a0ad;
+    --brand:#3b82f6;--novo:#64748b;--contato:#eab308;--proposta:#a855f7;--ganho:#22c55e;--perdido:#ef4444;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px}
+  .top h1{font-size:19px;display:flex;align-items:center;gap:8px}
+  .top h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+  .btn{border:0;cursor:pointer;font-weight:600;border-radius:9px;padding:10px 16px;font-size:14px;font-family:inherit}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn.ghost:hover{border-color:var(--brand)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 22px}
+  @media(max-width:680px){.stats{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+  .stat .label{color:var(--muted);font-size:13px}
+  .stat .value{font-size:24px;font-weight:800;margin-top:2px}
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:6px 22px 40px;align-items:start}
+  @media(max-width:900px){.board{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.board{grid-template-columns:1fr}}
+  .col{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px;min-height:120px}
+  .col h2{font-size:14px;display:flex;align-items:center;gap:8px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+  .col h2 .tag{width:10px;height:10px;border-radius:3px}
+  .col h2 .count{margin-left:auto;color:var(--muted);font-weight:600}
+  .lead{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+  .lead.lost{opacity:.55}
+  .lead .name{font-weight:700;font-size:15px;display:flex;justify-content:space-between;gap:8px}
+  .lead .val{color:var(--ganho);font-weight:700;white-space:nowrap}
+  .lead .meta{color:var(--muted);font-size:12px;margin:4px 0 8px}
+  .lead .obs{font-size:13px;color:#c5cdd8;margin-bottom:10px;white-space:pre-wrap}
+  .lead .actions{display:flex;gap:6px;flex-wrap:wrap}
+  .mini{border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:inherit}
+  .mini:hover{color:var(--text);border-color:var(--brand)}
+  .mini.wa:hover{border-color:var(--ganho);color:var(--ganho)}
+  .mini.del:hover{border-color:var(--perdido);color:var(--perdido)}
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:16px 4px}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .overlay.open{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;width:100%;max-width:440px;padding:24px}
+  .modal h3{margin-bottom:16px}
+  .modal label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  .modal input,.modal textarea,.modal select{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit}
+  .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal .foot{display:flex;gap:10px;margin-top:20px}
+  .modal .foot .btn{flex:1}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1><span class="dot"></span> CRM · Funil de Vendas</h1>
+    <div>
+      <button class="btn ghost" id="seed">Dados de exemplo</button>
+      <button class="btn ghost" id="export">Exportar</button>
+      <button class="btn primary" id="add">+ Novo lead</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Leads ativos</div><div class="value" id="s-ativos">0</div></div>
+    <div class="stat"><div class="label">Valor no funil</div><div class="value" id="s-funil">R$ 0</div></div>
+    <div class="stat"><div class="label">Ganhos (valor)</div><div class="value" style="color:var(--ganho)" id="s-ganho">R$ 0</div></div>
+    <div class="stat"><div class="label">Conversão</div><div class="value" id="s-conv">0%</div></div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="modal-title">Novo lead</h3>
+      <input type="hidden" id="f-id" />
+      <label>Nome *</label>
+      <input id="f-nome" placeholder="Ex.: Maria Souza" />
+      <div class="row">
+        <div><label>WhatsApp</label><input id="f-fone" placeholder="55 11 90000-0000" /></div>
+        <div><label>Valor estimado (R$)</label><input id="f-valor" type="number" min="0" placeholder="1500" /></div>
+      </div>
+      <label>Origem</label>
+      <select id="f-origem">
+        <option>Instagram</option><option>Indicação</option><option>Google</option>
+        <option>WhatsApp</option><option>Tráfego pago</option><option>Outro</option>
+      </select>
+      <label>Observações</label>
+      <textarea id="f-obs" rows="3" placeholder="O que o cliente precisa, próximos passos..."></textarea>
+      <div class="foot">
+        <button class="btn ghost" id="cancel">Cancelar</button>
+        <button class="btn primary" id="save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const KEY = 'crm_leads_v1';
+const STAGES = [
+  { id:'novo',     nome:'Novo',            cor:'var(--novo)' },
+  { id:'contato',  nome:'Em contato',      cor:'var(--contato)' },
+  { id:'proposta', nome:'Proposta',        cor:'var(--proposta)' },
+  { id:'ganho',    nome:'Ganho',           cor:'var(--ganho)' },
+];
+const $ = (id) => document.getElementById(id);
+let leads = load();
+
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function persist(){ localStorage.setItem(KEY, JSON.stringify(leads)); render(); }
+function brl(n){ return 'R$ ' + (Number(n)||0).toLocaleString('pt-BR'); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function render(){
+  const board = $('board');
+  board.innerHTML = '';
+  STAGES.forEach((st, idx) => {
+    const inStage = leads.filter(l => l.stage === idx && !l.lost);
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `<h2><span class="tag" style="background:${st.cor}"></span>${st.nome}<span class="count">${inStage.length}</span></h2>`;
+    if(inStage.length === 0){ col.insertAdjacentHTML('beforeend', '<div class="empty">Sem leads aqui</div>'); }
+    inStage.forEach(l => col.appendChild(cardEl(l, idx)));
+    board.appendChild(col);
+  });
+  // Perdidos (se houver)
+  const lost = leads.filter(l => l.lost);
+  if(lost.length){
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.style.gridColumn = '1 / -1';
+    col.innerHTML = `<h2><span class="tag" style="background:var(--perdido)"></span>Perdidos<span class="count">${lost.length}</span></h2>`;
+    lost.forEach(l => col.appendChild(cardEl(l, l.stage)));
+    document.getElementById('board').appendChild(col);
+  }
+  updateStats();
+}
+
+function cardEl(l, idx){
+  const el = document.createElement('div');
+  el.className = 'lead' + (l.lost ? ' lost' : '');
+  const fone = (l.fone||'').replace(/\D/g,'');
+  const waBtn = fone ? `<button class="mini wa" data-wa="${fone}">💬 WhatsApp</button>` : '';
+  const back = (idx>0 && !l.lost) ? `<button class="mini" data-move="-1">◀</button>` : '';
+  const fwd  = (idx<STAGES.length-1 && !l.lost) ? `<button class="mini" data-move="1">▶</button>` : '';
+  const lostBtn = l.lost
+    ? `<button class="mini" data-recover="1">↩ Recuperar</button>`
+    : `<button class="mini del" data-lost="1">Perdido</button>`;
+  el.innerHTML = `
+    <div class="name">${esc(l.nome)} ${l.valor?`<span class="val">${brl(l.valor)}</span>`:''}</div>
+    <div class="meta">${esc(l.origem||'—')}${l.fone?' · '+esc(l.fone):''}</div>
+    ${l.obs?`<div class="obs">${esc(l.obs)}</div>`:''}
+    <div class="actions">${back}${fwd}${waBtn}<button class="mini" data-edit="1">Editar</button>${lostBtn}<button class="mini del" data-del="1">🗑</button></div>`;
+  el.querySelector('[data-move="-1"]')?.addEventListener('click', ()=>{ l.stage--; persist(); });
+  el.querySelector('[data-move="1"]')?.addEventListener('click', ()=>{ l.stage++; persist(); });
+  el.querySelector('[data-lost]')?.addEventListener('click', ()=>{ l.lost = true; persist(); });
+  el.querySelector('[data-recover]')?.addEventListener('click', ()=>{ l.lost = false; persist(); });
+  el.querySelector('[data-edit]')?.addEventListener('click', ()=> openModal(l));
+  el.querySelector('[data-del]')?.addEventListener('click', ()=>{ if(confirm('Excluir este lead?')){ leads = leads.filter(x=>x.id!==l.id); persist(); } });
+  el.querySelector('[data-wa]')?.addEventListener('click', (e)=>{ window.open('https://wa.me/'+e.target.dataset.wa, '_blank'); });
+  return el;
+}
+
+function updateStats(){
+  const ativos = leads.filter(l => !l.lost && l.stage < 3);
+  const funil = ativos.reduce((s,l)=> s + (Number(l.valor)||0), 0);
+  const ganhos = leads.filter(l => !l.lost && l.stage === 3);
+  const valorGanho = ganhos.reduce((s,l)=> s + (Number(l.valor)||0), 0);
+  const fechados = ganhos.length + leads.filter(l=>l.lost).length;
+  const conv = fechados ? Math.round(ganhos.length / fechados * 100) : 0;
+  $('s-ativos').textContent = ativos.length;
+  $('s-funil').textContent = brl(funil);
+  $('s-ganho').textContent = brl(valorGanho);
+  $('s-conv').textContent = conv + '%';
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// Modal
+function openModal(lead){
+  $('modal-title').textContent = lead ? 'Editar lead' : 'Novo lead';
+  $('f-id').value = lead?.id || '';
+  $('f-nome').value = lead?.nome || '';
+  $('f-fone').value = lead?.fone || '';
+  $('f-valor').value = lead?.valor || '';
+  $('f-origem').value = lead?.origem || 'Instagram';
+  $('f-obs').value = lead?.obs || '';
+  $('overlay').classList.add('open');
+  $('f-nome').focus();
+}
+function closeModal(){ $('overlay').classList.remove('open'); }
+
+$('add').addEventListener('click', ()=> openModal(null));
+$('cancel').addEventListener('click', closeModal);
+$('overlay').addEventListener('click', (e)=>{ if(e.target === $('overlay')) closeModal(); });
+$('save').addEventListener('click', ()=>{
+  const nome = $('f-nome').value.trim();
+  if(!nome){ $('f-nome').focus(); return; }
+  const id = $('f-id').value;
+  const data = { nome, fone:$('f-fone').value.trim(), valor:$('f-valor').value, origem:$('f-origem').value, obs:$('f-obs').value.trim() };
+  if(id){ Object.assign(leads.find(l=>l.id===id), data); }
+  else { leads.push({ id:uid(), stage:0, lost:false, ...data }); }
+  closeModal(); persist();
+});
+
+$('export').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(leads,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'crm-leads.json'; a.click();
+});
+
+$('seed').addEventListener('click', ()=>{
+  if(leads.length && !confirm('Isso adiciona leads de exemplo. Continuar?')) return;
+  const ex = [
+    { nome:'Maria Souza', fone:'5511990000001', valor:1500, origem:'Instagram', obs:'Quer site para clínica de estética.', stage:2 },
+    { nome:'João Pereira', fone:'5511990000002', valor:497, origem:'Indicação', obs:'Site de advocacia. Pediu proposta.', stage:1 },
+    { nome:'Ana Lima', fone:'5511990000003', valor:997, origem:'Tráfego pago', obs:'Pacote completo + IA.', stage:3 },
+    { nome:'Carlos Dias', fone:'', valor:800, origem:'Google', obs:'Ainda avaliando.', stage:0 },
+  ];
+  ex.forEach(e => leads.push({ id:uid(), lost:false, ...e }));
+  persist();
+});
+
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+render();
+</script>
+</body>
+</html>
