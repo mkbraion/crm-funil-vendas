@@ -85,10 +85,9 @@
 
   /* Categorias */
   .cats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
-  .cat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 12px;text-align:center;cursor:pointer;transition:transform .14s,border-color .14s,background .14s}
+  .cat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px 12px;min-height:74px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:transform .14s,border-color .14s,background .14s}
   .cat:hover{transform:translateY(-4px);border-color:var(--green);background:#16221a}
-  .cat .emoji{font-size:30px}
-  .cat .name{margin-top:8px;font-weight:700;font-size:13.5px}
+  .cat .name{font-weight:700;font-size:15px}
 
   /* Filtros */
   .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
@@ -224,7 +223,7 @@
 
   <!-- Barra de aviso -->
   <div class="announce">
-    <span>🚚 Frete fixo para todo o Brasil • 📦 Rastreio enviado no seu WhatsApp • ⚡ 10% OFF no PIX</span>
+    <span>Frete fixo para todo o Brasil • Rastreio enviado no seu WhatsApp • 10% OFF no PIX</span>
   </div>
 
   <!-- Header -->
@@ -264,7 +263,7 @@
   <section class="hero" style="padding:0">
     <div class="wrap">
       <div class="left">
-        <span class="eyebrow">✦ Nova coleção 2026</span>
+        <span class="eyebrow">Nova coleção 2026</span>
         <h1>ESTILO QUE<br><em>FALA POR</em> VOCÊ</h1>
         <p>Streetwear masculino e feminino selecionado peça a peça. Camisas, tênis, acessórios e perfumes com a atitude da Merseu Store.</p>
         <div class="cta-row">
@@ -319,7 +318,7 @@
     <div class="wrap">
       <div class="strip">
         <div>
-          <h3>SEMANA DO <em>DROP VERDE</em> 🔥</h3>
+          <h3>SEMANA DO <em>DROP VERDE</em></h3>
           <p>Até 40% OFF em peças selecionadas + 10% extra no PIX. Corre que é por tempo limitado.</p>
         </div>
         <a href="#produtos" class="btn primary">Aproveitar agora</a>
@@ -406,7 +405,7 @@
       </div>
       <div class="copy">
         <span>© 2026 Merseu Store. Todos os direitos reservados.</span>
-        <span>Feito com 💚 no Brasil</span>
+        <span>Feito no Brasil</span>
       </div>
     </div>
   </footer>
@@ -430,7 +429,7 @@
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/></svg>
         Finalizar no WhatsApp
       </button>
-      <p class="fee">🔒 Frete fixo • 10% OFF no PIX aplicado no fechamento</p>
+      <p class="fee">Frete fixo • 10% OFF no PIX aplicado no fechamento</p>
     </div>
   </aside>
 
@@ -446,31 +445,31 @@
 
   // ---------- Catálogo ----------
   const CATEGORIES = [
-    { id:'camisas',    name:'Camisas',    emoji:'👕' },
-    { id:'tenis',      name:'Tênis',      emoji:'👟' },
-    { id:'acessorios', name:'Acessórios', emoji:'🧢' },
-    { id:'perfumes',   name:'Perfumes',   emoji:'🧴' },
-    { id:'shorts',     name:'Shorts',     emoji:'🩳' },
-    { id:'relogios',   name:'Relógios',   emoji:'⌚' },
+    { id:'camisas',    name:'Camisas' },
+    { id:'tenis',      name:'Tênis' },
+    { id:'acessorios', name:'Acessórios' },
+    { id:'perfumes',   name:'Perfumes' },
+    { id:'shorts',     name:'Shorts' },
+    { id:'relogios',   name:'Relógios' },
   ];
 
   const PRODUCTS = [
-    { id:1,  name:'Camiseta Merseu Oversized', cat:'camisas',    emoji:'👕', price:89.90,  old:129.90, rating:4.9, tag:'-31%' },
-    { id:2,  name:'Camisa Gola Polo Verde',    cat:'camisas',    emoji:'👕', price:119.90, old:159.90, rating:4.8 },
-    { id:3,  name:'Tênis Urban Green',         cat:'tenis',      emoji:'👟', price:299.90, old:449.90, rating:5.0, tag:'-33%' },
-    { id:4,  name:'Tênis Dunk Street',         cat:'tenis',      emoji:'👟', price:349.90, old:499.90, rating:4.9 },
-    { id:5,  name:'Boné Trucker Merseu',       cat:'acessorios', emoji:'🧢', price:69.90,  old:99.90,  rating:4.7 },
-    { id:6,  name:'Corrente Prata 60cm',       cat:'acessorios', emoji:'📿', price:59.90,  rating:4.6 },
-    { id:7,  name:'Perfume Green Collection',  cat:'perfumes',   emoji:'🧴', price:99.90,  old:149.90, rating:4.8, tag:'-33%' },
-    { id:8,  name:'Perfume Black Intense',     cat:'perfumes',   emoji:'🖤', price:109.90, rating:4.9 },
-    { id:9,  name:'Short Linho Play',          cat:'shorts',     emoji:'🩳', price:79.90,  old:109.90, rating:4.7 },
-    { id:10, name:'Short Sarja Cargo',         cat:'shorts',     emoji:'🩳', price:99.90,  rating:4.5 },
-    { id:11, name:'Relógio Smart Fit',         cat:'relogios',   emoji:'⌚', price:189.90, old:299.90, rating:4.8, tag:'-36%' },
-    { id:12, name:'Relógio Analógico Prime',   cat:'relogios',   emoji:'⌚', price:159.90, rating:4.6 },
-    { id:13, name:'Óculos de Sol Blackout',    cat:'acessorios', emoji:'🕶️', price:79.90,  old:119.90, rating:4.7 },
-    { id:14, name:'Moletom Canguru Verde',     cat:'camisas',    emoji:'🧥', price:149.90, old:199.90, rating:5.0, tag:'-25%' },
-    { id:15, name:'Tênis Jordan Retro',        cat:'tenis',      emoji:'👟', price:429.90, rating:4.9 },
-    { id:16, name:'Pulseira Couro Trançado',   cat:'acessorios', emoji:'⛓️', price:39.90,  rating:4.5 },
+    { id:1,  name:'Camiseta Merseu Oversized', cat:'camisas',    price:89.90,  old:129.90, rating:4.9, tag:'-31%' },
+    { id:2,  name:'Camisa Gola Polo Verde',    cat:'camisas',    price:119.90, old:159.90, rating:4.8 },
+    { id:3,  name:'Tênis Urban Green',         cat:'tenis',      price:299.90, old:449.90, rating:5.0, tag:'-33%' },
+    { id:4,  name:'Tênis Dunk Street',         cat:'tenis',      price:349.90, old:499.90, rating:4.9 },
+    { id:5,  name:'Boné Trucker Merseu',       cat:'acessorios', price:69.90,  old:99.90,  rating:4.7 },
+    { id:6,  name:'Corrente Prata 60cm',       cat:'acessorios', price:59.90,  rating:4.6 },
+    { id:7,  name:'Perfume Green Collection',  cat:'perfumes',   price:99.90,  old:149.90, rating:4.8, tag:'-33%' },
+    { id:8,  name:'Perfume Black Intense',     cat:'perfumes',   price:109.90, rating:4.9 },
+    { id:9,  name:'Short Linho Play',          cat:'shorts',     price:79.90,  old:109.90, rating:4.7 },
+    { id:10, name:'Short Sarja Cargo',         cat:'shorts',     price:99.90,  rating:4.5 },
+    { id:11, name:'Relógio Smart Fit',         cat:'relogios',   price:189.90, old:299.90, rating:4.8, tag:'-36%' },
+    { id:12, name:'Relógio Analógico Prime',   cat:'relogios',   price:159.90, rating:4.6 },
+    { id:13, name:'Óculos de Sol Blackout',    cat:'acessorios', price:79.90,  old:119.90, rating:4.7 },
+    { id:14, name:'Moletom Canguru Verde',     cat:'camisas',    price:149.90, old:199.90, rating:5.0, tag:'-25%' },
+    { id:15, name:'Tênis Jordan Retro',        cat:'tenis',      price:429.90, rating:4.9 },
+    { id:16, name:'Pulseira Couro Trançado',   cat:'acessorios', price:39.90,  rating:4.5 },
   ];
 
   // ---------- Estado ----------
@@ -495,7 +494,6 @@
   function renderCats(){
     $('#cats').innerHTML = CATEGORIES.map(c => `
       <div class="cat" data-cat="${c.id}">
-        <div class="emoji">${c.emoji}</div>
         <div class="name">${c.name}</div>
       </div>`).join('');
     $$('.cat').forEach(el => el.addEventListener('click', ()=>{
@@ -526,7 +524,6 @@
           <button class="fav" data-fav="${p.id}" aria-label="Favoritar">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
           </button>
-          <span>${p.emoji}</span>
         </div>
         <div class="info">
           <span class="cat-tag">${catName}</span>
@@ -544,7 +541,7 @@
       </article>`;
     }).join('');
     $$('[data-add]').forEach(el => el.addEventListener('click', ()=> addToCart(+el.dataset.add)));
-    $$('[data-fav]').forEach(el => el.addEventListener('click', ()=>{ el.style.color='var(--green)'; toast('❤️ Adicionado aos favoritos'); }));
+    $$('[data-fav]').forEach(el => el.addEventListener('click', ()=>{ el.style.color='var(--green)'; toast('Adicionado aos favoritos'); }));
   }
 
   // ---------- Carrinho ----------
@@ -552,7 +549,7 @@
     cart[id] = (cart[id]||0) + 1;
     save(); renderCart();
     const p = PRODUCTS.find(x=>x.id===id);
-    toast(`✅ ${p.name} no carrinho`);
+    toast(`${p.name} no carrinho`);
     const c = $('#cartBtn');
     c.animate([{transform:'scale(1)'},{transform:'scale(1.2)'},{transform:'scale(1)'}], {duration:300});
   }
@@ -578,12 +575,12 @@
     const entries = cartEntries();
     const box = $('#ditems');
     if(entries.length === 0){
-      box.innerHTML = `<div class="empty-cart"><div class="big">🛒</div><p>Seu carrinho está vazio.</p><p style="font-size:13px;margin-top:6px">Adicione produtos e finalize pelo WhatsApp.</p></div>`;
+      box.innerHTML = `<div class="empty-cart"><p>Seu carrinho está vazio.</p><p style="font-size:13px;margin-top:6px">Adicione produtos e finalize pelo WhatsApp.</p></div>`;
       $('#dfoot').hidden = true;
     } else {
       box.innerHTML = entries.map(({p,q}) => `
         <div class="citem">
-          <div class="ci-thumb">${p.emoji}</div>
+          <div class="ci-thumb"></div>
           <div class="ci-info">
             <div class="ci-name">${p.name}</div>
             <div class="ci-price">${brl(p.price)}</div>
@@ -610,9 +607,9 @@
   function checkout(){
     const entries = cartEntries();
     if(entries.length === 0) return;
-    let msg = `Olá, *${STORE}*! 🛍️ Quero finalizar meu pedido:%0A%0A`;
+    let msg = `Olá, *${STORE}*! Quero finalizar meu pedido:%0A%0A`;
     entries.forEach(({p,q}) => { msg += `• ${q}x ${p.name} — ${brl(p.price*q)}%0A`; });
-    msg += `%0A*Total: ${brl(cartTotal())}*%0A%0AAguardo as formas de pagamento e o frete. 💚`;
+    msg += `%0A*Total: ${brl(cartTotal())}*%0A%0AAguardo as formas de pagamento e o frete.`;
     window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, '_blank', 'noopener');
   }
 
@@ -627,7 +624,7 @@
       document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
       toast(`Encontramos: ${found.name}`);
     } else {
-      toast('Nenhum produto encontrado 😕');
+      toast('Nenhum produto encontrado');
     }
   }
 
@@ -641,7 +638,7 @@
   $$('#mobileMenu a').forEach(a => a.addEventListener('click', ()=> $('#mobileMenu').classList.remove('open')));
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeCart(); });
 
-  const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Olá, Merseu Store! Vim pelo site e quero saber mais 💚')}`;
+  const waLink = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Olá, Merseu Store! Vim pelo site e quero saber mais.')}`;
   $('#waFloat').href = waLink;
   $('#waFooter').href = waLink;
   $('#waFloat').target = '_blank';
@@ -649,7 +646,7 @@
   $('#newsForm').addEventListener('submit', e => {
     e.preventDefault();
     $('#newsEmail').value = '';
-    toast('🎉 Pronto! Seu cupom foi enviado por e-mail.');
+    toast('Pronto! Seu cupom foi enviado por e-mail.');
   });
 
   // ---------- Init ----------
