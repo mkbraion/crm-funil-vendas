@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Baixador de vídeos · Medal, TikTok, Pinterest, Instagram</title>
+<meta name="description" content="Baixe vídeos do Medal, TikTok, Pinterest e Instagram colando a URL. Roda junto do CRM." />
+<style>
+  :root{
+    --bg:#0d1117;--panel:#161b22;--card:#1c2330;--border:#2a3340;--text:#e6edf3;--muted:#96a0ad;
+    --brand:#3b82f6;--ganho:#22c55e;--perdido:#ef4444;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px}
+  .top h1{font-size:19px;display:flex;align-items:center;gap:8px}
+  .top h1 .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+  .btn{border:0;cursor:pointer;font-weight:600;border-radius:9px;padding:10px 16px;font-size:14px;font-family:inherit}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:disabled{opacity:.6;cursor:not-allowed}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text);text-decoration:none;display:inline-block}
+  .btn.ghost:hover{border-color:var(--brand)}
+  .wrap{max-width:640px;margin:0 auto;padding:28px 22px 60px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:6px 13px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit}
+  input:focus{outline:0;border-color:var(--brand)}
+  .go{display:flex;gap:10px;margin-top:14px}
+  .go .btn{flex:1}
+  .hint{font-size:12px;color:var(--muted);margin-top:14px}
+  details summary{cursor:pointer;font-size:12px;color:var(--muted)}
+  details input{margin-top:6px}
+  .status{margin-top:16px;font-size:14px;padding:12px 14px;border-radius:9px;display:none}
+  .status.show{display:block}
+  .status.info{background:var(--card);border:1px solid var(--border);color:var(--text)}
+  .status.err{background:#3a1a1a;border:1px solid var(--perdido);color:#f6a5a5}
+  .status.ok{background:#12281a;border:1px solid var(--ganho);color:#9ff0c0}
+  .preview{display:none;margin-top:16px;gap:12px;align-items:center}
+  .preview.show{display:flex}
+  .preview img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--card)}
+  .preview .meta{font-size:13px}
+  .preview .meta .t{font-weight:700;font-size:14px;margin-bottom:2px}
+  .preview .meta .s{color:var(--muted)}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .legal{font-size:11px;color:var(--muted);margin-top:22px;line-height:1.5}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1><span class="dot"></span> Baixador de vídeos</h1>
+    <a class="btn ghost" href="index.html">← Voltar ao CRM</a>
+  </div>
+
+  <div class="wrap">
+    <div class="chips">
+      <span class="chip">🎮 Medal</span>
+      <span class="chip">🎵 TikTok</span>
+      <span class="chip">📌 Pinterest</span>
+      <span class="chip">📷 Instagram</span>
+    </div>
+
+    <div class="card">
+      <label for="url">Cole o link do vídeo</label>
+      <input id="url" type="url" placeholder="https://medal.tv/... ou tiktok.com/... etc." autocomplete="off" />
+
+      <div class="go">
+        <button class="btn ghost" id="preview" type="button">Pré-visualizar</button>
+        <button class="btn primary" id="download" type="button">Baixar</button>
+      </div>
+
+      <div class="preview" id="pv">
+        <img id="pv-thumb" alt="" />
+        <div class="meta">
+          <div class="t" id="pv-title"></div>
+          <div class="s" id="pv-sub"></div>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <details style="margin-top:16px">
+        <summary>Servidor (avançado)</summary>
+        <input id="base" placeholder="https://crm-downloader.onrender.com" />
+      </details>
+
+      <p class="hint">O download roda no servidor (yt-dlp). Configure a URL do servidor acima se você hospedou o backend em outro endereço.</p>
+    </div>
+
+    <p class="legal">
+      Baixar de TikTok, Pinterest e Instagram pode ferir os Termos de Serviço dessas plataformas.
+      Use para conteúdo próprio ou com permissão. O download de mídia com direitos autorais sem autorização é responsabilidade de quem usa.
+    </p>
+  </div>
+
+<script>
+const BASE_KEY = 'downloader_api_base';
+const DEFAULT_BASE = 'https://crm-downloader.onrender.com';
+const $ = (id) => document.getElementById(id);
+
+$('base').value = localStorage.getItem(BASE_KEY) || '';
+
+function base(){
+  const v = ($('base').value.trim() || DEFAULT_BASE).replace(/\/$/, '');
+  if($('base').value.trim()) localStorage.setItem(BASE_KEY, v);
+  return v;
+}
+function setStatus(msg, kind){
+  const s = $('status');
+  s.className = 'status show ' + (kind || 'info');
+  s.innerHTML = msg;
+}
+function clearStatus(){ $('status').className = 'status'; }
+function validUrl(u){
+  try { const p = new URL(u); return p.protocol === 'http:' || p.protocol === 'https:'; }
+  catch { return false; }
+}
+function fmtDur(sec){
+  if(!sec && sec !== 0) return '';
+  sec = Math.round(sec);
+  const m = Math.floor(sec/60), s = sec%60;
+  return m + ':' + String(s).padStart(2,'0');
+}
+
+$('preview').addEventListener('click', async ()=>{
+  const url = $('url').value.trim();
+  $('pv').className = 'preview';
+  if(!validUrl(url)){ setStatus('Cole um link válido (começando com http).', 'err'); return; }
+  setStatus('<span class="spin"></span> Lendo informações do vídeo...', 'info');
+  try{
+    const res = await fetch(base() + '/api/info?url=' + encodeURIComponent(url));
+    const data = await res.json().catch(()=> ({}));
+    if(!res.ok) throw new Error(data.error || 'Não consegui ler esse link.');
+    $('pv-thumb').src = data.thumbnail || '';
+    $('pv-thumb').style.display = data.thumbnail ? '' : 'none';
+    $('pv-title').textContent = data.title || 'vídeo';
+    $('pv-sub').textContent = [data.platform, data.uploader, fmtDur(data.duration)].filter(Boolean).join(' · ');
+    $('pv').className = 'preview show';
+    clearStatus();
+  }catch(e){
+    setStatus(e.message, 'err');
+  }
+});
+
+$('download').addEventListener('click', async ()=>{
+  const url = $('url').value.trim();
+  if(!validUrl(url)){ setStatus('Cole um link válido (começando com http).', 'err'); return; }
+  const btn = $('download');
+  btn.disabled = true;
+  setStatus('<span class="spin"></span> Baixando... isso pode levar alguns segundos (mais no primeiro acesso, se o servidor estava dormindo).', 'info');
+  try{
+    const res = await fetch(base() + '/api/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if(!res.ok){
+      const data = await res.json().catch(()=> ({}));
+      throw new Error(data.error || 'Falha ao baixar.');
+    }
+    // Nome do arquivo vindo do header, com fallback.
+    let filename = 'video.mp4';
+    const cd = res.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+    if(m) filename = decodeURIComponent(m[1].replace(/"/g,''));
+
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+    setStatus('✅ Pronto! O download começou: <strong>' + filename + '</strong>', 'ok');
+  }catch(e){
+    setStatus(e.message, 'err');
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+$('url').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('download').click(); });
+</script>
+</body>
+</html>
