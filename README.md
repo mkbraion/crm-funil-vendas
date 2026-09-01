@@ -24,6 +24,24 @@ Clique em **"☁️ Entrar na nuvem"**, crie uma conta e pronto: os leads passam
 
 O endereço do servidor pode ser ajustado no próprio login (campo "Servidor"), caso você hospede o [crm-api](https://github.com/mkbraion/crm-api) em outra URL.
 
+## Baixador de vídeos (Medal, TikTok, Pinterest, Instagram)
+
+No topo do CRM tem o botão **🎬 Baixar vídeo**, que abre a página `baixador.html`:
+cola o link e baixa o vídeo. Suporta **Medal, TikTok, Pinterest e Instagram** via
+[yt-dlp](https://github.com/yt-dlp/yt-dlp).
+
+Como esses sites não deixam baixar direto do navegador (CORS + download forçado),
+o yt-dlp roda num pequeno backend em `server/` (Flask), que você sobe no Render
+igual ao `crm-api` — veja [`server/README.md`](server/README.md). Depois de
+hospedar, coloque a URL do servidor no campo **Servidor** da página do baixador.
+
+**Sem API paga e sem teto de requisição** — o único custo é a banda/hospedagem.
+No plano free do Render a instância dorme após 15 min e a banda é limitada
+(~100 GB/mês); se o uso de vídeo crescer, suba para um plano pago barato.
+
+> Baixar de TikTok/Pinterest/Instagram pode ferir os Termos de Serviço dessas
+> plataformas — use para conteúdo próprio ou com permissão.
+
 ## Próximos passos
 
 Lembrete de follow-up pra não esquecer de retornar o cliente, e arrastar-e-soltar entre as colunas.
