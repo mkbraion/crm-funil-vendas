@@ -1,0 +1,7 @@
+Flask==3.0.3
+flask-cors==4.0.1
+gunicorn==22.0.0
+# Sem versão fixa de propósito: os sites (TikTok/Instagram/etc.) mudam com
+# frequência e só a versão mais nova do yt-dlp costuma continuar funcionando.
+# Refaça o deploy de tempos em tempos para atualizar os extratores.
+yt-dlp
