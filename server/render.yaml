@@ -1,0 +1,16 @@
+# Deploy no Render (https://render.com) com 1 clique via "Blueprint".
+# Aponte o Render para este repositório; ele lê este arquivo e sobe o serviço.
+services:
+  - type: web
+    name: crm-downloader
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    plan: free            # troque para "starter" se bater o limite de banda do free
+    autoDeploy: true
+    envVars:
+      - key: MAX_FILESIZE_MB
+        value: "300"       # tamanho máximo por download (segurança, não cobrança)
+      - key: SOCKET_TIMEOUT
+        value: "30"
+    healthCheckPath: /
