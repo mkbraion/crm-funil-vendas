@@ -9,7 +9,7 @@
 
 </div>
 
-**Stack / tópicos:** ``crm`` · ``frontend`` · ``html`` · ``javascript`` · ``kanban`` · ``localstorage`` · ``offline-first`` · ``rest-api`` · ``sales`` · ``sales-funnel`` · ``sales-management`` · ``web-app``
+**Stack / tópicos:** ``crm`` · ``frontend`` · ``html`` · ``javascript`` · ``kanban`` · ``localstorage`` · ``offline-first`` · ``rest-api`` · ``sales`` · ``sales-funnel`` · ``sales-management`` · ``vercel``
 
 > Projeto mantido por [@mkbraion](https://github.com/mkbraion).
 <!-- MKBRAION-POLISH:END -->
