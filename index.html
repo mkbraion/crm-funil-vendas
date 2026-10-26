@@ -158,12 +158,12 @@ const $ = (id) => document.getElementById(id);
 const CLOUD = {
   base: localStorage.getItem(BASE_KEY) || DEFAULT_BASE,
   token: localStorage.getItem(TOKEN_KEY) || null,
-  user: JSON.parse(localStorage.getItem(USER_KEY) || 'null'),
+  user: (() => { try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null'); } catch { return null; } })(),
 };
 let leads = loadLocal();
 let authMode = 'login';
 
-function loadLocal(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+function loadLocal(){ try { const data = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(data) ? data : []; } catch { return []; } }
 function saveLocal(){ localStorage.setItem(KEY, JSON.stringify(leads)); }
 function brl(n){ return 'R$ ' + (Number(n)||0).toLocaleString('pt-BR'); }
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
