@@ -1,19 +1,3 @@
-<!-- MKBRAION-POLISH:START -->
-<div align="center">
-
-# CRM Funil Vendas
-
-**CRM de funil de vendas com interface Kanban, funcionamento offline, armazenamento local e sincronização com API própria.**
-
-[![Repositório](https://img.shields.io/badge/GitHub-Repositório-181717?logo=github)](https://github.com/mkbraion/crm-funil-vendas) [![Demo ao vivo](https://img.shields.io/badge/Demo-Abrir%20aplicação-2ea44f?logo=vercel)](https://mkbraion.github.io/crm-funil-vendas/)
-
-</div>
-
-**Stack / tópicos:** ``crm`` · ``frontend`` · ``html`` · ``javascript`` · ``kanban`` · ``localstorage`` · ``offline-first`` · ``rest-api`` · ``sales`` · ``sales-funnel`` · ``sales-management`` · ``vercel``
-
-> Projeto mantido por [@mkbraion](https://github.com/mkbraion).
-<!-- MKBRAION-POLISH:END -->
-
 # CRM · Funil de Vendas
 
 Um CRM enxuto que roda no navegador. Abre e usa: cadastra o lead, move pelo funil e acompanha a conversão na hora. Por padrão os dados ficam salvos no próprio navegador — e, se você quiser, dá pra **criar uma conta e sincronizar na nuvem** para acessar os leads de qualquer aparelho.
